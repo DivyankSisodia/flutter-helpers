@@ -3,8 +3,6 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:fpdart/fpdart.dart';
 
 import '../model/api_model.dart';
@@ -115,11 +113,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // ignore_for_file: avoid_print
 
-import 'dart:convert';
 import 'dart:isolate';
-import 'package:dio/dio.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fpdart/fpdart.dart';
 
 class ApiFailure {
   final String message;

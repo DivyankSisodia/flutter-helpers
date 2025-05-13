@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../view/cart.dart';
 import '../view/multiple_product_view.dart';
-import '../view/product_view.dart';
 
 // class SingleProduct extends ConsumerStatefulWidget {
 //   const SingleProduct({super.key});
@@ -81,15 +81,66 @@ class _MultipleProductsState extends ConsumerState<MultipleProducts> {
     return Scaffold(
       appBar: AppBar(title: const Text('Multiple Products')),
       body: Container(
-        decoration: BoxDecoration(boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.7), blurRadius: 10, offset: const Offset(0, 5))]),
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.7),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            )
+          ],
+        ),
         margin: const EdgeInsets.all(10),
-        child: products.when(
+        child: Row(
+          children: [
+            Expanded(child: products.when(
           data: (data) {
             return ListView.builder(
-              itemBuilder: (context, index) {
-                return Card(child: Column(children: [Text(data[index].title ?? 'No title'), Text(data[index].description ?? 'No description'), Text(data[index].price.toString()), Image.network(data[index].thumbnail ?? '')]));
-              },
               itemCount: data.length,
+              itemBuilder: (context, index) {
+                final product = data[index];
+                return Card(
+                  child: Column(
+                    children: [
+                      Text(product.title ?? 'No title'),
+                      Text(product.description ?? 'No description'),
+                      Text(product.price.toString()),
+                      Image.network(product.thumbnail ?? ''),
+                      Row(
+                        children:[
+                          ElevatedButton(
+                          onPressed: () {
+                            ref.read(cartProvider.notifier).addToCart(
+                              Cart(
+                                id: product.id ?? 0,
+                                title: product.title ?? '',
+                                description: product.description ?? '',
+                              ),
+                            );
+                          },
+                          child: const Text('Add to Cart'),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            ref.read(cartProvider.notifier).removeFromCart(
+                              product.id ?? 0,
+                            );
+                          },
+                          child: const Text('Delete from cart'),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            ref.read(cartProvider.notifier).clearCart(
+                            );
+                          },
+                          child: const Text('Clear whole cart'),
+                        ),
+                        ], 
+                      ),
+                    ],
+                  ),
+                );
+              },
             );
           },
           error: (error, stackTrace) {
@@ -98,7 +149,32 @@ class _MultipleProductsState extends ConsumerState<MultipleProducts> {
           loading: () {
             return const Center(child: CircularProgressIndicator());
           },
+        ),),
+        Expanded(
+          child: Consumer(
+            builder: (context, ref, _) {
+              final cartState = ref.watch(cartProvider);
+              // NOTE: You cannot use .when(data: ..., error: ..., loading: ...) with cartProvider
+              // because it is a StateNotifierProvider<List<Cart>> and not an AsyncValue.
+              // To use .when, cartProvider must return AsyncValue<List<Cart>> (e.g., via FutureProvider/StreamProvider).
+              if (cartState.isEmpty) {
+                return const Center(child: Text('Cart is empty'));
+              }
+              return ListView.builder(
+                itemCount: cartState.length,
+                itemBuilder: (context, index) {
+                  final item = cartState[index];
+                  return ListTile(
+                    title: Text(item.title),
+                    subtitle: Text(item.description),
+                  );
+                },
+              );
+            },
+          ),
         ),
+          ],
+        )
       ),
     );
   }

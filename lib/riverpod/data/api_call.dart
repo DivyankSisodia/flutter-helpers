@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:helper_1/riverpod/provider/api_provider.dart';
+import 'package:helper_1/api_provider.dart';
 
 import '../../isolates_example/data/api_call.dart';
 import '../model/product.dart';
