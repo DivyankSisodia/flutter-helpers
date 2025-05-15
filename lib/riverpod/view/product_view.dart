@@ -6,15 +6,6 @@ class ProductViewModel extends StateNotifier<AsyncValue<ProductModel>> {
   final ApiService apiService;
   ProductViewModel(this.apiService) : super(const AsyncValue.loading());
 
-  // Future<void> fetchProduct() async {
-  //   if (state.isLoading) return; // Prevent multiple calls
-  //   state = const AsyncValue.loading();
-  //   final result = await apiService.getSingleProduct();
-  //   result.fold(
-  //     (error) => state = AsyncValue.error(error, StackTrace.current),
-  //     (product) => state = AsyncValue.data(product),
-  //   );
-  // }
   Future<void> fetchSingleProduct() async {
     try {
       if (!state.isLoading) {

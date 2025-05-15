@@ -2,7 +2,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:helper_1/isolates_example/data/api_call.dart';
-import 'package:helper_1/riverpod/model/product.dart';
 
 import '../../api_provider.dart';
 import '../model/model.dart';

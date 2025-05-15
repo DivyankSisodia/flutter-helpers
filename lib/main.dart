@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:helper_1/riverpod/screen/ui.dart';
 
-import 'isolates_example/screen/api_UI.dart';
-import 'pagination/screen/pagination_screen.dart';
 
 void main() {
   runApp(ProviderScope(child: const MainApp()));
@@ -14,8 +12,8 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: PaginationScreen(),
+    return MaterialApp(
+      home: PaginatedListScreen(),
     );
   }
 }

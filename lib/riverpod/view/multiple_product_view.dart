@@ -27,6 +27,7 @@ class MultipleProductViewModel extends StateNotifier<AsyncValue<List<ProductMode
       );
     } catch (e, stackTrace) {
       state = AsyncValue.error(e, stackTrace);
+      
     }
   }
 }
