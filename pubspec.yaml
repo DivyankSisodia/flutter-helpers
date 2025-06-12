@@ -4,20 +4,25 @@ publish_to: 'none'
 version: 0.1.0
 
 environment:
-  sdk: ^3.7.2
+  sdk: ^3.4.0
 
 dependencies:
-  dio: ^5.8.0+1
+  dio: null
   ffmpeg_wasm: ^1.0.3
-  file_picker: ^10.1.9
+  file_picker: null
   flutter:
     sdk: flutter
-  flutter_riverpod: ^2.6.1
-  fpdart: ^1.1.1
-  gap: ^3.0.1
+  flutter_riverpod: null
+  fpdart: null
+  gap: null
+  google_sign_in: null
+  googleapis: null
+  googleapis_auth: null
+  http: ^1.4.0
+  shared_preferences: 
 
 dev_dependencies:
-  flutter_lints: ^5.0.0
+  flutter_lints: null
   flutter_test:
     sdk: flutter
 
