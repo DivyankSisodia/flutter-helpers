@@ -15,14 +15,14 @@ class FirstCustomWidget extends StatelessWidget {
       ),
       body: Center(
         child: SizeMeter(
-          totalCapacity: 512, // Total storage capacity in GB
+          totalCapacity: 432, // Total storage capacity in GB
           arcs: const [
-            (42, Color(0xFFFF9CE9)), // 42GB - Neon Pink
-            (120, Color(0xFFFFF873)), // 120GB - Neon Yellow  
-            (350, Color(0xFF9CFFF9)), // 350GB - Neon Cyan
+            (68, Color(0xFFFF9CE9), Icons.photo), // 42GB - Neon Pink
+            (145, Color(0xFFFFF873), Icons.video_library), // 120GB - Neon Yellow
+            (219, Color(0xFF9CFFF9), Icons.folder), // 350GB - Neon Cyan
           ],
           arcWidth: 12.0, // Reduced to 75% of 16.0
-          spacing: 18.0, // Increased spacing for better separation
+          spacing: 20.0, // Increased spacing for better separation
           arcSizeTextStyle: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -36,8 +36,8 @@ class FirstCustomWidget extends StatelessWidget {
 }
 
 class SizeMeter extends StatelessWidget {
-  final int totalCapacity; // Total storage capacity in GB
-  final List<(int size, Color color)> arcs;
+  final int? totalCapacity; // Total storage capacity in GB (optional, not used for arc length)
+  final List<(int size, Color color, IconData icon)> arcs;
   final double arcWidth;
   final double spacing;
   final TextStyle arcSizeTextStyle;
@@ -45,7 +45,7 @@ class SizeMeter extends StatelessWidget {
 
   const SizeMeter({
     super.key,
-    required this.totalCapacity,
+    this.totalCapacity, // Made optional since we're using relative sizing
     required this.arcs,
     this.arcWidth = 10.0,
     this.spacing = 6.0,
@@ -56,49 +56,63 @@ class SizeMeter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const double meterSize = 280.0;
-    const double maxSweepAngle = math.pi * 1.5; // 270 degrees for full capacity
+    const double maxSweepAngle = math.pi * 4 / 3; // 240 degrees for full capacity
     
     // Sort arcs by size (largest first for outermost positioning)
-    final sortedArcs = List<(int, Color)>.from(arcs)..sort((a, b) => b.$1.compareTo(a.$1));
+    final sortedArcs = List<(int, Color, IconData)>.from(arcs)..sort((a, b) => b.$1.compareTo(a.$1));
     final neonColors = [
       const Color(0xFF9CFFF9), // Cyan neon for largest (outermost)
       const Color(0xFFFF9CE9), // Pink neon for medium (middle)
       const Color(0xFF00BFFF), // Blue neon for smallest (innermost)
     ];
-    
+
+    // Find the largest arc size to use as reference for relative sizing
+    final largestArcSize = sortedArcs.isNotEmpty ? sortedArcs.first.$1 : 1;
+
     // Assign colors based on position (largest gets cyan outermost, smallest gets blue innermost)
     final coloredArcs = sortedArcs.asMap().entries.map((entry) {
       final index = entry.key;
       final arc = entry.value;
       final color = index < neonColors.length ? neonColors[index] : neonColors.last;
-      return (arc.$1, color);
+      return (arc.$1, color, arc.$3); // Keep the original icon
     }).toList();
-    
+
     return SizedBox(
       width: meterSize,
       height: meterSize,
       child: Stack(
         alignment: Alignment.center,
         children: [
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: Text(
+              'Hello',
+              style: TextStyle(color: Colors.white, fontSize: 16),
+            ),
+          ),
           // Arc layers from outermost to innermost
-          ...coloredArcs.asMap().entries.map((entry) {
-            final index = entry.key;
-            final arc = entry.value;
-            final radius = (meterSize / 2) - (index * (arcWidth + spacing));
-            
-            // Calculate arc length based on data size relative to total capacity
-            final length = (arc.$1 / totalCapacity) * maxSweepAngle;
+          ...coloredArcs.asMap().entries.map(
+            (entry) {
+              final index = entry.key;
+              final arc = entry.value;
+              final radius = (meterSize / 2) - (index * (arcWidth + spacing));
 
-            return SizeMeterArc(
-              size: arc.$1,
-              color: arc.$2,
-              width: arcWidth,
-              length: length,
-              radius: radius,
-              arcSizeTextStyle: arcSizeTextStyle,
-              dimmedTextColor: dimmedTextColor,
-            );
-          }),
+              // Calculate arc length relative to the largest arc (not total capacity)
+              final length = (arc.$1 / largestArcSize) * maxSweepAngle;
+
+              return SizeMeterArc(
+                size: arc.$1,
+                color: arc.$2,
+                icon: arc.$3,
+                width: arcWidth,
+                length: length,
+                radius: radius,
+                arcSizeTextStyle: arcSizeTextStyle,
+                dimmedTextColor: dimmedTextColor,
+              );
+            },
+          ),
         ],
       ),
     );
@@ -108,6 +122,7 @@ class SizeMeter extends StatelessWidget {
 class SizeMeterArc extends StatelessWidget {
   final int size;
   final Color color;
+  final IconData icon;
   final double width;
   final double length; // in radians
   final double radius;
@@ -118,6 +133,7 @@ class SizeMeterArc extends StatelessWidget {
     super.key,
     required this.size,
     required this.color,
+    required this.icon,
     required this.width,
     required this.length,
     required this.radius,
@@ -129,10 +145,14 @@ class SizeMeterArc extends StatelessWidget {
   Widget build(BuildContext context) {
     const double startAngle = math.pi / 2; // Start from bottom-right (45 degrees)
     final endAngle = startAngle + length;
-    
+
     // Position text slightly outside the end of the arc
     final textRadius = radius + 3;
-    
+
+    // Position icon at the start of the arc with right padding
+    final iconRadius = radius + 8;
+    final iconAngle = startAngle; // Position at the start of the arc
+
     // Rotate text to be tangent to the arc's end point
     final textRotationAngle = endAngle + math.pi / 2;
 
@@ -153,6 +173,22 @@ class SizeMeterArc extends StatelessWidget {
               startAngle: startAngle,
             ),
           ),
+          // Icon positioned at arc start
+          Transform.translate(
+            offset: Offset(
+              iconRadius * math.cos(iconAngle),
+              iconRadius * math.sin(iconAngle),
+            ),
+            child: Container(
+              padding: const EdgeInsets.only(left: 50.0, bottom: 16), // Right padding
+              child: Icon(
+                icon,
+                color: Colors.grey[200],
+                size: 18.0,
+              ),
+            ),
+          ),
+
           // Text positioned at arc end
           Transform.translate(
             offset: Offset(
@@ -162,7 +198,7 @@ class SizeMeterArc extends StatelessWidget {
             child: Transform.rotate(
               angle: textRotationAngle,
               child: Container(
-                padding: const EdgeInsets.only(top: 8.0, left: 60),
+                padding: const EdgeInsets.only(top: 8.0, left: 65),
                 child: _buildTextWidget(),
               ),
             ),
@@ -223,10 +259,10 @@ class ArcPainter extends CustomPainter {
     // Inner glow effect
     final innerGlowPaint = Paint()
       ..color = color.withOpacity(0.6)
-      ..strokeWidth = width + 4
+      ..strokeWidth = width + 3
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3.0);
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4.0);
 
     // Main arc
     final paint = Paint()
